@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a2540">
+  <title>VBSPU Smart Attendance Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="VBSPU Smart Attendance home">
+      <span class="brand-mark">V</span>
+      <span><strong>VBSPU</strong><small>SMART ATTENDANCE PORTAL</small></span>
+    </a>
+    <a class="top-link" href="admin.html">Teacher / Admin <span aria-hidden="true">→</span></a>
+  </header>
+  <main class="auth-layout">
+    <section class="welcome-panel">
+      <div class="eyebrow"><span class="live-dot"></span> CAMPUS ATTENDANCE, SIMPLIFIED</div>
+      <h1>Your campus.<br><span>Your presence.</span></h1>
+      <p>Check in securely when you arrive. Your attendance stays active while your device reports that you are within the campus geofence.</p>
+      <div class="welcome-note"><span class="note-icon">⌖</span><span><strong>Location-aware check-in</strong><small>Your location is used only while your attendance session is active.</small></span></div>
+      <div class="welcome-decoration" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+    </section>
+    <section class="auth-card">
+      <div class="card-heading"><span class="section-kicker">STUDENT PORTAL</span><h2>Sign in to your account</h2><p>Use your registered university details to continue.</p></div>
+      <form id="login-form">
+        <label>Roll number<input name="rollNo" autocomplete="username" placeholder="e.g. 230101" required></label>
+        <label>Full name<input name="name" autocomplete="name" placeholder="As registered with the university" required></label>
+        <div class="form-row">
+          <label>Branch<select name="branch" required><option value="">Select branch</option><option>Computer Science</option><option>Information Technology</option></select></label>
+          <label>Class / semester<select name="className" required><option value="">Select class</option><option>B.Tech · Semester 5</option><option>B.Tech · Semester 3</option></select></label>
+        </div>
+        <label>Password<input name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required></label>
+        <div id="login-error" class="form-message" role="alert" hidden></div>
+        <button class="button button-primary button-wide" type="submit">Sign in <span aria-hidden="true">→</span></button>
+      </form>
+      <p class="privacy-copy"><span>🔒</span> Your account and attendance information are private.</p>
+      <details class="demo-hint"><summary>Local demo access</summary><p>Roll <b>230101</b> · Aarav Singh · Computer Science · B.Tech · Semester 5<br>Password: <b>Demo123!</b><br>Admin: <b>admin</b> / <b>Admin123!</b></p></details>
+    </section>
+  </main>
+  <footer class="site-footer"><span>Veer Bahadur Singh Purvanchal University</span><span>Attendance with accountability</span></footer>
+  <script src="app.js" defer></script>
+</body>
+</html>

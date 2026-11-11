@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a2540">
+  <title>Student Dashboard · VBSPU Smart Attendance</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="student-page">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="VBSPU Smart Attendance home"><span class="brand-mark">V</span><span><strong>VBSPU</strong><small>SMART ATTENDANCE PORTAL</small></span></a>
+    <button class="button button-outline" id="logout-button">Sign out</button>
+  </header>
+  <main class="dashboard-wrap student-wrap">
+    <div class="dashboard-heading"><div><span class="section-kicker">STUDENT DASHBOARD</span><h1>Good to see you, <span id="student-first-name">Student</span></h1><p id="student-subtitle">Your attendance at a glance.</p></div><span class="date-chip" id="today-label"></span></div>
+    <section class="student-grid">
+      <article class="panel location-panel">
+        <div class="panel-heading"><div><h2>Campus attendance</h2><p id="campus-label">VBSPU Main Campus</p></div><span class="status-badge exited" id="presence-badge">NOT STARTED</span></div>
+        <div class="location-visual"><div class="radar"><span class="radar-ring ring-one"></span><span class="radar-ring ring-two"></span><span class="radar-ring ring-three"></span><span class="radar-center">⌖</span><span class="radar-user">●</span></div></div>
+        <div class="gps-status"><span class="gps-icon">⌖</span><div><strong id="gps-title">Location not active</strong><small id="gps-detail">Start a session to check your campus location.</small></div></div>
+        <div class="session-stats"><div><small>DISTANCE TO CENTER</small><strong id="distance-value">—</strong></div><div><small>TIME PRESENT</small><strong id="duration-value">01:00:00</strong></div></div>
+        <button class="button button-primary button-wide" id="session-button">Start attendance session <span aria-hidden="true">→</span></button>
+        <p class="location-disclaimer">Keep location permission enabled and this page open while attending class. Sessions time out after 90 seconds without a location update.</p>
+      </article>
+      <aside class="student-side">
+        <article class="panel profile-card"><div class="profile-avatar" id="avatar-initials">ST</div><div><strong id="student-name">Student</strong><small id="student-roll">Roll number</small></div><span class="profile-status">STUDENT</span><div class="profile-meta"><span>BRANCH</span><b id="student-branch">—</b><span>CLASS / SEMESTER</span><b id="student-class">—</b></div></article>
+        <article class="panel history-panel"><div class="panel-heading"><div><h2>Attendance history</h2><p>Your recent check-ins</p></div></div><div id="history-list" class="history-list"></div><div id="history-empty" class="history-empty" hidden>No attendance sessions yet.</div></article>
+        <div class="notice-card"><span>ⓘ</span><p><strong>About location privacy</strong>Your live location is checked only while a session is active. Location permission and GPS accuracy are controlled by your device and browser.</p></div>
+      </aside>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <footer class="site-footer"><span>Veer Bahadur Singh Purvanchal University</span><span>Smart attendance portal</span></footer>
+  <script src="student.js" defer></script>
+</body>
+</html>

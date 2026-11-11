@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a2540">
+  <title>Administration · VBSPU Smart Attendance</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-page">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="VBSPU Smart Attendance home"><span class="brand-mark">V</span><span><strong>VBSPU</strong><small>SMART ATTENDANCE PORTAL</small></span></a>
+    <a class="top-link" href="/">← Student portal</a>
+  </header>
+  <main class="admin-auth-wrap" id="admin-login-view">
+    <section class="auth-card admin-auth-card">
+      <div class="admin-icon">✦</div><div class="card-heading"><span class="section-kicker">STAFF ACCESS</span><h2>Administrator sign in</h2><p>Sign in with your authorized portal credentials.</p></div>
+      <form id="admin-login-form">
+        <label>Username<input name="rollNo" autocomplete="username" placeholder="Administrator username" required></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required></label>
+        <div id="admin-login-error" class="form-message" role="alert" hidden></div>
+        <button class="button button-primary button-wide" type="submit">Sign in to dashboard <span aria-hidden="true">→</span></button>
+      </form>
+      <details class="demo-hint"><summary>Local demo credentials</summary><p>Username: <b>admin</b><br>Password: <b>Admin123!</b></p></details>
+    </section>
+  </main>
+  <main class="dashboard-wrap" id="admin-dashboard" hidden>
+    <div class="dashboard-heading">
+      <div><span class="section-kicker">ATTENDANCE OVERVIEW</span><h1>Live campus monitoring</h1><p>Monitor active sessions and review attendance records.</p></div>
+      <div class="header-actions"><span class="refresh-indicator"><i></i> Live updates</span><button class="button button-outline" id="logout-button">Sign out</button></div>
+    </div>
+    <section class="metrics-grid">
+      <article class="metric-card"><span class="metric-label">REGISTERED STUDENTS</span><div><strong id="metric-students">—</strong><span class="metric-icon blue">♙</span></div><small>Student accounts</small></article>
+      <article class="metric-card"><span class="metric-label">ACTIVE ON CAMPUS</span><div><strong id="metric-active">—</strong><span class="metric-icon green">⌖</span></div><small>Currently inside geofence</small></article>
+      <article class="metric-card"><span class="metric-label">SESSIONS TODAY</span><div><strong id="metric-today">—</strong><span class="metric-icon gold">◷</span></div><small>Check-ins recorded today</small></article>
+    </section>
+    <section class="panel records-panel">
+      <div class="panel-heading"><div><h2>Attendance records</h2><p>Filter and export campus attendance.</p></div><button id="export-button" class="button button-primary">↓ <span>Download CSV</span></button></div>
+      <div class="filters">
+        <label class="search-control"><span aria-hidden="true">⌕</span><input id="search-filter" placeholder="Search name or roll number" aria-label="Search name or roll number"></label>
+        <select id="branch-filter" aria-label="Filter by branch"><option value="">All branches</option></select>
+        <select id="class-filter" aria-label="Filter by class"><option value="">All classes / semesters</option></select>
+        <input id="date-filter" type="date" aria-label="Filter by date">
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr><th>STUDENT</th><th>BRANCH / CLASS</th><th>DATE</th><th>CHECK-IN</th><th>LAST ACTIVE</th><th>DURATION</th><th>STATUS</th></tr></thead><tbody id="records-body"></tbody></table>
+        <div id="empty-records" class="empty-state" hidden><span>◷</span><strong>No attendance records found</strong><p>Try adjusting your filters or check back later.</p></div>
+      </div>
+      <div class="table-footer"><span id="record-count">0 records</span><span>Refreshes automatically every 10 seconds</span></div>
+    </section>
+    <section class="panel config-panel">
+      <div class="panel-heading"><div><h2>Campus geofence</h2><p>Set the check-in center and permitted radius.</p></div><span class="config-badge">ADMIN CONFIG</span></div>
+      <form id="config-form" class="config-fields">
+        <label>Campus label<input name="label" maxlength="80" required></label>
+        <label>Latitude<input name="latitude" type="number" step="any" min="-90" max="90" required></label>
+        <label>Longitude<input name="longitude" type="number" step="any" min="-180" max="180" required></label>
+        <label>Radius (meters)<input name="radius" type="number" min="10" max="10000" required></label>
+        <button class="button button-primary" type="submit">Save geofence</button>
+      </form>
+      <p id="config-message" class="inline-message" role="status"></p>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <footer class="site-footer"><span>Veer Bahadur Singh Purvanchal University</span><span>Administrative attendance dashboard</span></footer>
+  <script src="admin.js" defer></script>
+</body>
+</html>
