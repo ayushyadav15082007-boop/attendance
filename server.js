@@ -391,3 +391,4 @@ loadStore().then((loaded) => {
   console.error("Unable to initialize attendance data store:", error);
   process.exitCode = 1;
 });
+
