@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a2540">
+  <title>Welcome | VBSPU Smart Attendance</title>
+  <style>
+    *{box-sizing:border-box}
+    body{min-height:100vh;margin:0;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 35%,#174e83 0,#0a2540 48%,#071a2d 100%);color:#fff;font-family:"Segoe UI",Arial,sans-serif}
+    main{position:relative;z-index:1;width:min(90%,560px);text-align:center}
+    .mark{width:72px;height:72px;margin:0 auto 27px;display:grid;place-items:center;border:1px solid #ffffff36;border-radius:22px;background:#ffffff12;color:#f3c76e;font-size:34px;font-weight:800;box-shadow:0 12px 40px #0002}
+    .eyebrow{color:#b4cadb;font-size:10px;font-weight:700;letter-spacing:.2em}
+    h1{margin:13px 0 11px;font-size:clamp(30px,7vw,48px);letter-spacing:-.045em}
+    p{margin:0;color:#c0cfdd;font-size:14px;line-height:1.7}
+    .loader{width:46px;height:46px;margin:36px auto 15px;border:3px solid #ffffff30;border-top-color:#f3c76e;border-radius:50%;animation:spin .85s linear infinite}
+    .redirect{color:#b4cadb;font-size:11px}
+    .glow{position:fixed;width:440px;height:440px;border:1px solid #ffffff0d;border-radius:50%;pointer-events:none}
+    .glow:before,.glow:after{position:absolute;inset:38px;border:inherit;border-radius:inherit;content:""}
+    .glow:after{inset:85px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @media(prefers-reduced-motion:reduce){.loader{animation-duration:2.5s}}
+  </style>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+  <main>
+    <div class="mark" aria-hidden="true">V</div>
+    <div class="eyebrow">VEER BAHADUR SINGH PURVANCHAL UNIVERSITY</div>
+    <h1>Welcome to your campus</h1>
+    <p>A simpler, smarter way to stay connected with your attendance.</p>
+    <div class="loader" role="status" aria-label="Loading"></div>
+    <div class="redirect">Taking you to sign in…</div>
+  </main>
+  <script src="/splash.js" defer></script>
+</body>
+</html>

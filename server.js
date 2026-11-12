@@ -230,8 +230,8 @@ app.post("/api/auth/login", (req, res) => {
     && verifyPassword(password, candidate.passwordHash));
   if (!user || (role === "student" && (
     user.name.toLowerCase() !== String(name || "").trim().toLowerCase()
-    || user.branch !== String(branch || "").trim()
-    || user.className !== String(className || "").trim()
+    || (user.branch && user.branch !== String(branch || "").trim())
+    || (user.className && user.className !== String(className || "").trim())
   ))) {
     attempts.count += 1;
     loginAttempts.set(ip, attempts);
@@ -241,6 +241,38 @@ app.post("/api/auth/login", (req, res) => {
   const token = crypto.randomBytes(32).toString("hex");
   sessions.set(token, { rollNo: user.rollNo, expiresAt: Date.now() + TOKEN_TTL_MS });
   res.json({ token, user: safeUser(user) });
+});
+
+app.post("/register", async (req, res, next) => {
+  const { name, rollNo, password } = req.body || {};
+  const normalizedName = typeof name === "string" ? name.trim() : "";
+  const normalizedRollNo = typeof rollNo === "string" ? rollNo.trim() : "";
+  if (!normalizedName || normalizedName.length > 100
+      || !normalizedRollNo || normalizedRollNo.length > 40
+      || typeof password !== "string" || password.length < 8 || password.length > 200) {
+    return res.status(400).json({ error: "Enter a name, roll number, and password of at least 8 characters." });
+  }
+  if (store.users.some((user) => user.rollNo.toLowerCase() === normalizedRollNo.toLowerCase())) {
+    return res.status(409).json({ error: "An account with that roll number already exists." });
+  }
+
+  const user = {
+    rollNo: normalizedRollNo,
+    name: normalizedName,
+    branch: "",
+    className: "",
+    role: "student",
+    passwordHash: hashPassword(password)
+  };
+  store.users.push(user);
+  try {
+    await persist();
+    res.status(201).json({ message: "Registration successful. You can now sign in." });
+  } catch (error) {
+    const userIndex = store.users.indexOf(user);
+    if (userIndex !== -1) store.users.splice(userIndex, 1);
+    next(error);
+  }
 });
 
 app.post("/api/auth/logout", authenticate, (req, res) => {

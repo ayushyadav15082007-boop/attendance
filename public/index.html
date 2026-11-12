@@ -29,14 +29,15 @@
         <label>Roll number<input name="rollNo" autocomplete="username" placeholder="e.g. 230101" required></label>
         <label>Full name<input name="name" autocomplete="name" placeholder="As registered with the university" required></label>
         <div class="form-row">
-          <label>Branch<select name="branch" required><option value="">Select branch</option><option>Computer Science</option><option>Information Technology</option></select></label>
-          <label>Class / semester<select name="className" required><option value="">Select class</option><option>B.Tech · Semester 5</option><option>B.Tech · Semester 3</option></select></label>
+          <label>Branch<select name="branch"><option value="">Select branch (if applicable)</option><option>Computer Science</option><option>Information Technology</option></select></label>
+          <label>Class / semester<select name="className"><option value="">Select class (if applicable)</option><option>B.Tech · Semester 5</option><option>B.Tech · Semester 3</option></select></label>
         </div>
         <label>Password<input name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required></label>
         <div id="login-error" class="form-message" role="alert" hidden></div>
         <button class="button button-primary button-wide" type="submit">Sign in <span aria-hidden="true">→</span></button>
       </form>
       <p class="privacy-copy"><span>🔒</span> Your account and attendance information are private.</p>
+      <p class="privacy-copy">New student? <a href="/register.html">Create an account</a></p>
       <details class="demo-hint"><summary>Local demo access</summary><p>Roll <b>230101</b> · Aarav Singh · Computer Science · B.Tech · Semester 5<br>Password: <b>Demo123!</b><br>Admin: <b>admin</b> / <b>Admin123!</b></p></details>
     </section>
   </main>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a2540">
+  <title>Student Registration | VBSPU Smart Attendance</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .register-wrap{min-height:calc(100vh - 135px);display:grid;place-items:center;padding:40px 18px}
+    .register-card{width:min(100%,450px);padding:34px}
+    .register-card form>label{margin-bottom:17px}
+    .register-card .card-heading{margin-bottom:27px}
+    .register-card .form-message.success{color:#176b4a;background:#edf8f1}
+    .register-links{margin:18px 0 0;text-align:center;color:#8391a0;font-size:11px}
+    .register-links a{color:#245e8c;font-weight:700}
+    @media(max-width:680px){.register-wrap{min-height:calc(100vh - 123px);padding:25px 16px}.register-card{padding:27px 22px}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="VBSPU Smart Attendance home">
+      <span class="brand-mark">V</span>
+      <span><strong>VBSPU</strong><small>SMART ATTENDANCE PORTAL</small></span>
+    </a>
+    <a class="top-link" href="/">Sign in <span aria-hidden="true">→</span></a>
+  </header>
+  <main class="register-wrap">
+    <section class="auth-card register-card">
+      <div class="card-heading">
+        <span class="section-kicker">STUDENT PORTAL</span>
+        <h2>Create your account</h2>
+        <p>Register with your university name and roll number.</p>
+      </div>
+      <form id="register-form">
+        <label>Full name<input name="name" autocomplete="name" maxlength="100" placeholder="Your full name" required></label>
+        <label>Roll number<input name="rollNo" autocomplete="username" maxlength="40" placeholder="e.g. 230104" required></label>
+        <label>Password<input name="password" type="password" autocomplete="new-password" minlength="8" maxlength="200" placeholder="At least 8 characters" required></label>
+        <div id="register-message" class="form-message" role="alert" aria-live="polite" hidden></div>
+        <button class="button button-primary button-wide" type="submit">Create account <span aria-hidden="true">→</span></button>
+      </form>
+      <p class="register-links">Already registered? <a href="/">Sign in</a></p>
+      <p class="privacy-copy">🔒 Your password is stored securely.</p>
+    </section>
+  </main>
+  <footer class="site-footer"><span>Veer Bahadur Singh Purvanchal University</span><span>Attendance with accountability</span></footer>
+  <script src="/register.js" defer></script>
+</body>
+</html>

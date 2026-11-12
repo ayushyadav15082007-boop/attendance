@@ -33,6 +33,7 @@ The initial geofence is configured with `CAMPUS_LATITUDE`, `CAMPUS_LONGITUDE`, a
 
 ## API overview
 
+- `POST /register` — Register a student with a name, roll number, and password; passwords are stored as salted scrypt hashes.
 - `POST /api/auth/login` — Student/admin sign-in.
 - `POST /api/attendance/ping` — Start/update/stop a student session; coordinates are validated server-side.
 - `GET /api/attendance/live` — Active sessions (admin only).
