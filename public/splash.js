@@ -1,3 +1,3 @@
 window.setTimeout(() => {
-  window.location.replace("/");
+  window.location.replace("index.html");
 }, 3000);
