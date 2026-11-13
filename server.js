@@ -1,13 +1,14 @@
 const express = require("express");
 const crypto = require("node:crypto");
 const path = require("node:path");
-const admin = require("firebase-admin");
+const { initializeApp, cert } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const HEARTBEAT_TIMEOUT_MS = 3_000_000;
 const TOKEN_TTL_MS = 15 * 60 * 60 * 1000;
+
 const envNumber = (name, fallback) => process.env[name] === undefined ? fallback : Number(process.env[name]);
 const DEFAULT_CONFIG = {
   latitude: envNumber("CAMPUS_LATITUDE", 25.8316832),
@@ -97,7 +98,8 @@ async function initializeStore() {
   } catch (error) {
     throw new Error("FIREBASE_SERVICE_ACCOUNT is not valid JSON.", { cause: error });
   }
-  admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+  
+  initializeApp({ credential: cert(serviceAccount) });
   db = getFirestore();
 
   const configRef = db.collection("settings").doc("campus");
