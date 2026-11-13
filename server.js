@@ -2,6 +2,7 @@ const express = require("express");
 const crypto = require("node:crypto");
 const path = require("node:path");
 const admin = require("firebase-admin");
+const { getFirestore } = require("firebase-admin/firestore");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -97,7 +98,7 @@ async function initializeStore() {
     throw new Error("FIREBASE_SERVICE_ACCOUNT is not valid JSON.", { cause: error });
   }
   admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-  db = admin.firestore();
+  db = getFirestore();
 
   const configRef = db.collection("settings").doc("campus");
   const [configSnapshot, usersSnapshot, attendanceSnapshot] = await Promise.all([
