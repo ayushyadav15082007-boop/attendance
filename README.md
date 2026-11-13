@@ -1,13 +1,14 @@
 # VBSPU Smart Attendance Portal
 
-A mobile-friendly student attendance portal and staff dashboard built with Express and browser geolocation. Attendance records are persisted to a local JSON file; no separate database service is required.
+A mobile-friendly student attendance portal and staff dashboard built with Express, browser geolocation, and Cloud Firestore.
 
 ## Run locally
 
-1. Install Node.js 18 or newer.
-2. From this folder, run `npm install`.
-3. Run `npm start` and open [http://localhost:3000](http://localhost:3000).
-4. For location check-in, use `localhost` or serve the app over HTTPS. Browsers generally block geolocation on insecure origins.
+1. Install Node.js 18 or newer and create a Firebase project with Cloud Firestore enabled.
+2. Create a Firebase service-account key with Firestore access.
+3. Set `FIREBASE_SERVICE_ACCOUNT` to the complete service-account key as a JSON string. Keep this secret out of source control; configure it as an environment variable in Render.
+4. From this folder, run `npm install` and then `npm start`.
+5. Open [http://localhost:3000](http://localhost:3000). For location check-in, use `localhost` or serve the app over HTTPS. Browsers generally block geolocation on insecure origins.
 
 The initial local demo accounts are:
 
@@ -18,18 +19,18 @@ The initial local demo accounts are:
 | Student | `230103` | `Demo123!` | Rohan Mishra · Computer Science · B.Tech · Semester 3 |
 | Admin | `admin` | `Admin123!` | — |
 
-Set `ADMIN_PASSWORD` and `DEMO_PASSWORD` before the first run to change seeded demo credentials. The initial student accounts are local demonstration data; add institution-approved student provisioning and authentication before a real deployment.
+On first startup, the server creates `settings/campus` with the default geofence and seeds the `users` collection with the demo accounts when that collection is empty. Set `ADMIN_PASSWORD` and `DEMO_PASSWORD` before first startup to change seeded credentials. Add institution-approved student provisioning and authentication before a real deployment.
 
 ## Configuration
 
-The initial geofence is configured with `CAMPUS_LATITUDE`, `CAMPUS_LONGITUDE`, and `CAMPUS_RADIUS` (meters; defaults: `25.8316832`, `82.6800657`, `100`). The default campus-center coordinates are based on the OpenStreetMap university listing (© OpenStreetMap contributors, ODbL). Confirm the exact approved classroom/campus coordinates before deployment. An authenticated administrator can change the label, center coordinates, and radius from the dashboard. The persistent `data/store.json` file is created on first startup and contains account hashes and attendance records; back it up and restrict filesystem access.
+The initial geofence is configured with `CAMPUS_LATITUDE`, `CAMPUS_LONGITUDE`, and `CAMPUS_RADIUS` (meters; defaults: `25.8316832`, `82.6800657`, `100`). The default campus-center coordinates are based on the OpenStreetMap university listing (© OpenStreetMap contributors, ODbL). Confirm the exact approved classroom/campus coordinates before deployment. An authenticated administrator can change the label, center coordinates, and radius from the dashboard. Firestore stores the campus config in `settings/campus`, accounts in `users`, and attendance logs in `attendance`.
 
 ## Attendance behavior and limitations
 
 - The server uses the Haversine formula to check each submitted coordinate against the configured geofence. The student page gets location permission only after the student starts a session and sends updates every 30 seconds.
 - Moving outside the radius ends the active session. Sessions are also marked exited after 90 seconds without a successful heartbeat, covering a closed tab, lost connection, or revoked permission. A browser cannot guarantee a final request when it closes, so this timeout is authoritative.
 - Browsers provide device-reported coordinates, not cryptographic proof of physical location. Mock-location tools, compromised devices, or modified clients can spoof GPS; this implementation is suitable as a local/demo system, not a high-assurance attendance control. Deploy with HTTPS, institutional identity verification, a managed database, backups, audit/retention policies, and appropriate privacy notices before production use.
-- Local bearer tokens expire after 12 hours or a server restart. JSON persistence is intended for instant local testing and a single Node process; use a transactional database and shared session storage for production scale.
+- Bearer tokens expire after 12 hours or a server restart. The server loads Firestore data into memory at startup, so run a single app instance unless shared session handling and cross-instance data synchronization are added.
 
 ## API overview
 

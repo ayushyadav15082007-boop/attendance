@@ -1,25 +1,23 @@
 const express = require("express");
 const crypto = require("node:crypto");
-const fs = require("node:fs/promises");
 const path = require("node:path");
+const admin = require("firebase-admin");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
-const DATA_DIR = path.join(__dirname, "data");
-const DATA_FILE = path.join(DATA_DIR, "store.json");
-const HEARTBEAT_TIMEOUT_MS = 90_000;
-const TOKEN_TTL_MS = 12 * 60 * 60 * 1000;
+const HEARTBEAT_TIMEOUT_MS = 3_000_000;
+const TOKEN_TTL_MS = 15 * 60 * 60 * 1000;
 const envNumber = (name, fallback) => process.env[name] === undefined ? fallback : Number(process.env[name]);
 const DEFAULT_CONFIG = {
   latitude: envNumber("CAMPUS_LATITUDE", 25.8316832),
   longitude: envNumber("CAMPUS_LONGITUDE", 82.6800657),
-  radius: envNumber("CAMPUS_RADIUS", 5000000),
+  radius: envNumber("CAMPUS_RADIUS", 100),
   label: "VBSPU Main Campus"
 };
 const sessions = new Map();
 const loginAttempts = new Map();
 let store;
-let persistQueue = Promise.resolve();
+let db;
 
 app.disable("x-powered-by");
 app.use((req, res, next) => {
@@ -75,34 +73,57 @@ function createDemoStore() {
   };
 }
 
-async function loadStore() {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  try {
-    const saved = JSON.parse(await fs.readFile(DATA_FILE, "utf8"));
-    return {
-      config: { ...DEFAULT_CONFIG, ...saved.config },
-      users: Array.isArray(saved.users) ? saved.users : [],
-      records: Array.isArray(saved.records) ? saved.records : []
-    };
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
-    const initial = createDemoStore();
-    await fs.writeFile(DATA_FILE, JSON.stringify(initial, null, 2), { flag: "wx" }).catch(async (writeError) => {
-      if (writeError.code !== "EEXIST") throw writeError;
-    });
-    try {
-      return JSON.parse(await fs.readFile(DATA_FILE, "utf8"));
-    } catch (readError) {
-      if (readError.code !== "ENOENT") throw readError;
-      return initial;
-    }
-  }
+function userDocumentId(rollNo) {
+  return Buffer.from(rollNo).toString("base64url");
 }
 
-function persist() {
-  const snapshot = JSON.stringify(store, null, 2);
-  persistQueue = persistQueue.then(() => fs.writeFile(DATA_FILE, snapshot));
-  return persistQueue;
+async function saveUser(user) {
+  await db.collection("users").doc(userDocumentId(user.rollNo)).set(user);
+}
+
+async function saveRecord(record) {
+  await db.collection("attendance").doc(record.id).set(record);
+}
+
+async function initializeStore() {
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
+    throw new Error("FIREBASE_SERVICE_ACCOUNT must contain the Firebase service-account JSON.");
+  }
+
+  let serviceAccount;
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } catch (error) {
+    throw new Error("FIREBASE_SERVICE_ACCOUNT is not valid JSON.", { cause: error });
+  }
+  admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+  db = admin.firestore();
+
+  const configRef = db.collection("settings").doc("campus");
+  const [configSnapshot, usersSnapshot, attendanceSnapshot] = await Promise.all([
+    configRef.get(),
+    db.collection("users").get(),
+    db.collection("attendance").get()
+  ]);
+  const initial = createDemoStore();
+
+  if (!configSnapshot.exists) await configRef.set(DEFAULT_CONFIG);
+  if (usersSnapshot.empty) {
+    const batch = db.batch();
+    for (const user of initial.users) {
+      batch.set(db.collection("users").doc(userDocumentId(user.rollNo)), user);
+    }
+    await batch.commit();
+  }
+
+  const loadedUsers = usersSnapshot.empty
+    ? initial.users
+    : usersSnapshot.docs.map((document) => document.data());
+  return {
+    config: configSnapshot.exists ? { ...DEFAULT_CONFIG, ...configSnapshot.data() } : DEFAULT_CONFIG,
+    users: loadedUsers,
+    records: attendanceSnapshot.docs.map((document) => document.data())
+  };
 }
 
 function haversineMeters(lat1, lon1, lat2, lon2) {
@@ -138,16 +159,16 @@ function exitRecord(record, when = new Date()) {
   }
 }
 
-function expireStaleSessions() {
+async function expireStaleSessions() {
   const now = Date.now();
-  let changed = false;
+  const changed = [];
   for (const record of store.records) {
     if (record.status === "PRESENT" && now - Date.parse(record.lastActivePing) > HEARTBEAT_TIMEOUT_MS) {
       exitRecord(record, new Date(Date.parse(record.lastActivePing) + HEARTBEAT_TIMEOUT_MS));
-      changed = true;
+      changed.push(saveRecord(record));
     }
   }
-  if (changed) persist().catch((error) => console.error("Could not persist expired attendance:", error));
+  await Promise.all(changed);
 }
 
 function safeUser(user) {
@@ -160,8 +181,12 @@ function safeUser(user) {
   };
 }
 
-function authenticate(req, res, next) {
-  expireStaleSessions();
+async function authenticate(req, res, next) {
+  try {
+    await expireStaleSessions();
+  } catch (error) {
+    return next(error);
+  }
   const token = (req.get("authorization") || "").replace(/^Bearer\s+/i, "");
   const session = sessions.get(token);
   if (!session || session.expiresAt <= Date.now()) {
@@ -264,13 +289,11 @@ app.post("/register", async (req, res, next) => {
     role: "student",
     passwordHash: hashPassword(password)
   };
-  store.users.push(user);
   try {
-    await persist();
+    await saveUser(user);
+    store.users.push(user);
     res.status(201).json({ message: "Registration successful. You can now sign in." });
   } catch (error) {
-    const userIndex = store.users.indexOf(user);
-    if (userIndex !== -1) store.users.splice(userIndex, 1);
     next(error);
   }
 });
@@ -293,14 +316,15 @@ app.put("/api/config", authenticate, requireRole("admin"), async (req, res, next
       || radius < 10 || radius > 10_000) {
     return res.status(400).json({ error: "Enter valid coordinates and a radius from 10 to 10,000 meters." });
   }
-  store.config = {
+  const config = {
     latitude,
     longitude,
     radius,
     label: typeof label === "string" && label.trim() ? label.trim().slice(0, 80) : "Campus"
   };
   try {
-    await persist();
+    await db.collection("settings").doc("campus").set(config);
+    store.config = config;
     res.json(store.config);
   } catch (error) {
     next(error);
@@ -316,7 +340,7 @@ app.post("/api/attendance/ping", authenticate, requireRole("student"), async (re
     if (active) {
       exitRecord(active);
       try {
-        await persist();
+        await saveRecord(active);
       } catch (error) {
         return next(error);
       }
@@ -331,7 +355,7 @@ app.post("/api/attendance/ping", authenticate, requireRole("student"), async (re
     if (active) {
       exitRecord(active);
       try {
-        await persist();
+        await saveRecord(active);
       } catch (error) {
         return next(error);
       }
@@ -352,12 +376,12 @@ app.post("/api/attendance/ping", authenticate, requireRole("student"), async (re
       durationSpent: 0,
       status: "PRESENT"
     };
-    store.records.push(record);
   } else {
     record.lastActivePing = now.toISOString();
   }
   try {
-    await persist();
+    await saveRecord(record);
+    if (!active) store.records.push(record);
     res.json({ status: "PRESENT", distance: Math.round(distance), record: publicRecord(record) });
   } catch (error) {
     next(error);
@@ -365,12 +389,10 @@ app.post("/api/attendance/ping", authenticate, requireRole("student"), async (re
 });
 
 app.get("/api/attendance/live", authenticate, requireRole("admin"), (req, res) => {
-  expireStaleSessions();
   res.json(store.records.filter((record) => record.status === "PRESENT").map(publicRecord));
 });
 
 app.get("/api/attendance/logs", authenticate, (req, res) => {
-  expireStaleSessions();
   const filters = req.query;
   let records = store.records;
   if (req.user.role === "student") records = records.filter((record) => record.rollNo === req.user.rollNo);
@@ -412,7 +434,7 @@ app.use((error, req, res, next) => {
   res.status(status).json({ error: status === 500 ? "An unexpected server error occurred." : "The request body is invalid." });
 });
 
-loadStore().then((loaded) => {
+initializeStore().then((loaded) => {
   store = loaded;
   app.listen(PORT, () => {
     console.log(`VBSPU Smart Attendance Portal listening on http://localhost:${PORT}`);
