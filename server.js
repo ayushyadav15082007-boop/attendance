@@ -13,7 +13,7 @@ const envNumber = (name, fallback) => process.env[name] === undefined ? fallback
 const DEFAULT_CONFIG = {
   latitude: envNumber("CAMPUS_LATITUDE", 25.8316832),
   longitude: envNumber("CAMPUS_LONGITUDE", 82.6800657),
-  radius: envNumber("CAMPUS_RADIUS", 100),
+  radius: envNumber("CAMPUS_RADIUS", 1000000),
   label: "VBSPU Main Campus"
 };
 const sessions = new Map();
