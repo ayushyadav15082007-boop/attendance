@@ -1,3 +1,3 @@
 window.setTimeout(() => {
-  window.location.replace("login.html");
+  window.location.replace("/");
 }, 3000);
